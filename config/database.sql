@@ -1,5 +1,4 @@
 
-
 CREATE DATABASE IF NOT EXISTS db_parkir;
 USE db_parkir;
 
@@ -31,4 +30,4 @@ INSERT INTO tabel_parkir (nomor_plat, jenis_kendaraan, waktu_masuk, waktu_keluar
 ('S 9999 XY', 'Roda 2', '2026-09-30 08:00:00', '2026-09-30 08:45:00', 'Selesai', 2000),
 ('W 4321 ZZ', 'Roda 4', '2026-09-30 08:15:00', '2026-09-30 11:30:00', 'Selesai', 8000),
 ('AE 1111 AA', 'Roda 2', '2026-09-30 09:00:00', NULL, 'Parkir', 0),
-('B 2024 BC', 'Roda 4', '2026-09-30 09:15:00', NULL, 'Parkir', 0);
+('B 2024 BC', 'Roda 4', '2026-09-30 09:15:00', NULL, 'Parkir', 0); 
