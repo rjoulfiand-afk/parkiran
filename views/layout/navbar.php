@@ -1,46 +1,49 @@
 <?php if(session_status()===PHP_SESSION_NONE) session_start(); ?>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2 mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-2 mb-4 shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="index.php?page=dashboard">
-            <i class="fa-solid fa-square-parking me-1 text-warning"></i> E-Parkir
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="index.php?page=dashboard">
+            <i class="fa-solid fa-square-parking text-primary fs-4"></i>
+            <span>Aplikasi Parkir</span>
         </a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarMenu">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                 <li class="nav-item">
                     <a class="nav-link <?php echo (isset($_GET['page']) && $_GET['page']=='dashboard' ? 'active fw-bold' : ''); ?>"
                        href="index.php?page=dashboard">
-                        <i class="fa-solid fa-gauge me-1"></i> Dashboard
+                        Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?php echo (isset($_GET['page']) && $_GET['page']=='parkir_masuk' ? 'active fw-bold' : ''); ?>"
                        href="index.php?page=parkir_masuk">
-                        <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Parkir Masuk
+                        Parkir Masuk
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?php echo (isset($_GET['page']) && $_GET['page']=='parkir_keluar' ? 'active fw-bold' : ''); ?>"
                        href="index.php?page=parkir_keluar">
-                        <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Parkir Keluar
+                        Parkir Keluar
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?php echo (isset($_GET['page']) && $_GET['page']=='laporan' ? 'active fw-bold' : ''); ?>"
                        href="index.php?page=laporan">
-                        <i class="fa-solid fa-file-lines me-1"></i> Laporan
+                        Laporan
                     </a>
                 </li>
             </ul>
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-white-50 small">
-                    <i class="fa fa-user-circle me-1"></i>
-                    <?php echo isset($_SESSION['nama_petugas']) ? htmlspecialchars($_SESSION['nama_petugas']) : ''; ?>
+
+            <div class="d-flex align-items-center gap-3">
+                <span class="navbar-text small text-white-50">
+                    Petugas: <strong class="text-white"><?php echo isset($_SESSION['nama_petugas']) ? htmlspecialchars($_SESSION['nama_petugas']) : 'Admin'; ?></strong>
                 </span>
-                <button onclick="konfirmasiKeluar()" class="btn btn-warning btn-sm fw-bold text-dark px-3">
-                    <i class="fa fa-sign-out-alt me-1"></i> Keluar
+                <button onclick="konfirmasiKeluar()" class="btn btn-outline-danger btn-sm">
+                    Keluar
                 </button>
             </div>
         </div>
@@ -54,11 +57,11 @@
 <script>
 function konfirmasiKeluar() {
     Swal.fire({
-        title: 'Keluar dari Aplikasi?',
-        text: 'Anda harus login kembali untuk mengakses sistem.',
-        icon: 'question',
+        title: 'Konfirmasi Keluar',
+        text: 'Apakah Anda yakin ingin keluar dari sistem?',
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#212529',
+        confirmButtonColor: '#dc3545',
         cancelButtonColor: '#6c757d',
         confirmButtonText: 'Ya, Keluar',
         cancelButtonText: 'Batal'
