@@ -1,6 +1,25 @@
 <?php
 if(session_status()===PHP_SESSION_NONE) session_start();
 if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
+
+if(!isset($tanggal)) $tanggal = date('Y-m-d');
+
+if(!function_exists('tgl_indo')) {
+    function tgl_indo($t) {
+        $bulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        $ts = strtotime($t);
+        return date('j', $ts).' '.$bulan[(int)date('n', $ts)].' '.date('Y', $ts);
+    }
+}
+
+$baris = [];
+while($r = $data_laporan->fetch_assoc()) { $baris[] = $r; }
+$jml_total   = count($baris);
+$jml_selesai = 0;
+foreach($baris as $b) { if($b['status'] == 'Selesai') $jml_selesai++; }
+$jml_parkir  = $jml_total - $jml_selesai;
+$tgl = htmlspecialchars($tanggal);
+$rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -9,150 +28,276 @@ if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Harian - Sistem Parkir</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f8fafc; color: #1e293b; font-size: 0.95rem; }
+        
+        .box-panel {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .toolbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 12px 16px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-filter {
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #334155;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+        .btn-export:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
+        /* 4 Ringkasan Angka */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .summary-item {
+            padding: 14px 18px;
+            border-right: 1px solid #e2e8f0;
+        }
+        .summary-item:last-child { border-right: none; }
+        .summary-item .label {
+            font-size: 0.78rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+        .summary-item .val {
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
+
+        /* Hijau Segar Elegan (Emerald Medium) */
+        .text-green-fresh {
+            color: #16a34a !important;
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            .summary-item:nth-child(2) { border-right: none; }
+            .summary-item:nth-child(n+3) { border-top: 1px solid #e2e8f0; }
+        }
+
+        /* Header Blok Berwarna Slate Navy Sesuai Tema */
+        .table-laporan {
+            width: 100%;
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+        .table-laporan thead th {
+            background: #1e293b;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 11px 14px;
+            border: none;
+        }
+        .table-laporan td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+        .table-laporan tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        .table-laporan tfoot td {
+            background: #f1f5f9;
+            font-weight: 700;
+            border-top: 2px solid #cbd5e1;
+            padding: 13px 14px;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
     <?php include 'views/layout/navbar.php'; ?>
 
-    <div class="container">
+    <main class="container pb-5">
+        <div class="mb-3">
+            <h4 class="fw-bold mb-0 text-dark">Laporan Transaksi Parkir</h4>
+            <div class="text-muted small">Periode: <strong><?php echo tgl_indo($tanggal); ?></strong></div>
+        </div>
 
-        <!-- Alert sukses hapus -->
         <?php if(isset($_GET['pesan']) && $_GET['pesan']=='hapus_sukses'): ?>
         <script>
             Swal.fire({
                 icon: 'success',
                 title: 'Data Dihapus',
-                text: 'Data parkir berhasil dihapus.',
+                text: 'Data parkir telah berhasil dihapus dari sistem.',
                 timer: 2000,
                 showConfirmButton: false
             });
         </script>
         <?php endif; ?>
 
-        <!-- Filter tanggal & tombol export -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-3">
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <form action="index.php" method="GET" class="d-flex align-items-center gap-2">
-                        <input type="hidden" name="page" value="laporan">
-                        <label class="fw-semibold mb-0 text-muted small">Tanggal:</label>
-                        <input type="date" name="tanggal" class="form-control" value="<?php echo $tanggal; ?>" required>
-                        <button type="submit" class="btn btn-primary fw-semibold px-3">Tampilkan</button>
-                    </form>
-                    <div class="d-flex gap-2">
-                        <a href="index.php?page=cetak_pdf&tanggal=<?php echo $tanggal; ?>"
-                           target="_blank"
-                           class="btn btn-danger fw-semibold">
-                            <i class="fa-solid fa-file-pdf me-1"></i> Unduh PDF
-                        </a>
-                        <a href="index.php?page=export_csv&tanggal=<?php echo $tanggal; ?>"
-                           class="btn btn-success fw-semibold">
-                            <i class="fa-solid fa-file-excel me-1"></i> Unduh Spreadsheet
-                        </a>
-                    </div>
+        <div class="box-panel mb-4 shadow-sm">
+            <!-- Toolbar Filter & Tombol Ekspor -->
+            <div class="toolbar-container">
+                <form action="index.php" method="GET" class="filter-group m-0">
+                    <input type="hidden" name="page" value="laporan">
+                    <span class="small fw-semibold text-secondary">Tanggal:</span>
+                    <input type="date" name="tanggal" class="form-control form-control-sm" style="width: 160px;" value="<?php echo $tgl; ?>" required>
+                    <button type="submit" class="btn btn-dark btn-sm btn-filter">
+                        <i class="fa-solid fa-search"></i> Tampilkan
+                    </button>
+                </form>
+
+                <div class="d-flex align-items-center gap-2">
+                    <a href="index.php?page=cetak_pdf&tanggal=<?php echo urlencode($tanggal); ?>" target="_blank" class="btn-export">
+                        <i class="fa-solid fa-print text-danger"></i> Cetak / PDF
+                    </a>
+                    <a href="index.php?page=export_csv&tanggal=<?php echo urlencode($tanggal); ?>" class="btn-export">
+                        <i class="fa-solid fa-file-excel text-success"></i> Ekspor Excel
+                    </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Tabel laporan -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white py-3">
-                <h6 class="fw-bold mb-0">
-                    <i class="fa-solid fa-file-lines me-1"></i>
-                    Laporan Harian: <?php echo date('d F Y', strtotime($tanggal)); ?>
-                </h6>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover mb-0 align-middle">
-                        <thead class="table-dark text-center">
-                            <tr>
-                                <th>No</th>
-                                <th>No. Plat</th>
-                                <th>Jenis</th>
-                                <th>Waktu Masuk</th>
-                                <th>Waktu Keluar</th>
-                                <th>Status</th>
-                                <th>Total Bayar</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $no = 1;
-                            $ada_data = false;
-                            while($row = $data_laporan->fetch_assoc()):
-                                $ada_data = true;
-                            ?>
-                            <tr class="text-center">
-                                <td><?php echo $no++; ?></td>
-                                <td class="fw-bold text-primary"><?php echo htmlspecialchars($row['nomor_plat']); ?></td>
-                                <td><?php echo $row['jenis_kendaraan']; ?></td>
-                                <td><?php echo date('H:i', strtotime($row['waktu_masuk'])); ?></td>
-                                <td><?php echo $row['waktu_keluar'] ? date('H:i', strtotime($row['waktu_keluar'])) : '-'; ?></td>
-                                <td>
-                                    <?php if($row['status']=='Selesai'): ?>
-                                        <span class="badge bg-success">Selesai</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-warning text-dark">Parkir</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="fw-semibold text-success">
-                                    <?php echo $row['total_bayar'] > 0 ? 'Rp '.number_format($row['total_bayar'],0,',','.') : '-'; ?>
-                                </td>
-                                <td>
-                                    <button
-                                        onclick="konfirmasiHapus(<?php echo $row['id_parkir']; ?>, '<?php echo htmlspecialchars($row['nomor_plat']); ?>', '<?php echo $tanggal; ?>')"
-                                        class="btn btn-sm btn-outline-danger fw-semibold">
-                                        <i class="fa fa-trash me-1"></i> Hapus
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-
-                            <?php if(!$ada_data): ?>
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
-                                    Tidak ada data parkir pada tanggal ini.
-                                </td>
-                            </tr>
-                            <?php else: ?>
-                            <tr class="table-light fw-bold">
-                                <td colspan="7" class="text-end pe-3">Total Pendapatan:</td>
-                                <td class="text-center text-success">
-                                    Rp <?php echo number_format($total_pendapatan,0,',','.'); ?>
-                                </td>
-                            </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+            <!-- 4 Kotak Ringkasan Angka -->
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">Total Pendapatan</div>
+                    <!-- Hijau lebih hidup & segar -->
+                    <div class="val text-green-fresh"><?php echo $rp($total_pendapatan); ?></div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Total Kendaraan</div>
+                    <div class="val text-dark"><?php echo $jml_total; ?> <small class="fs-6 fw-normal text-muted">Unit</small></div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Sudah Selesai</div>
+                    <!-- Hitam Solid -->
+                    <div class="val text-dark"><?php echo $jml_selesai; ?> <small class="fs-6 fw-normal text-muted">Unit</small></div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Sedang Parkir</div>
+                    <div class="val text-warning text-dark"><?php echo $jml_parkir; ?> <small class="fs-6 fw-normal text-muted">Unit</small></div>
                 </div>
             </div>
+
+            <!-- Tabel Data Laporan -->
+            <div class="table-responsive">
+                <table class="table-laporan">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 5%;">No</th>
+                            <th style="width: 18%;">No. Plat</th>
+                            <th style="width: 15%;">Jenis</th>
+                            <th class="text-center" style="width: 14%;">Waktu Masuk</th>
+                            <th class="text-center" style="width: 14%;">Waktu Keluar</th>
+                            <th class="text-center" style="width: 12%;">Status</th>
+                            <th class="text-end" style="width: 14%;">Total Bayar</th>
+                            <th class="text-center" style="width: 8%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if($jml_total == 0): ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                Tidak ada data transaksi parkir pada tanggal ini.
+                            </td>
+                        </tr>
+                        <?php else: ?>
+                        <?php foreach($baris as $i => $row): ?>
+                        <tr>
+                            <td class="text-center text-muted"><?php echo $i + 1; ?></td>
+                            <!-- Plat Nomor Hitam Solid -->
+                            <td class="fw-bold text-dark"><?php echo htmlspecialchars($row['nomor_plat']); ?></td>
+                            <td><?php echo htmlspecialchars($row['jenis_kendaraan']); ?></td>
+                            <td class="text-center"><?php echo date('H:i', strtotime($row['waktu_masuk'])); ?></td>
+                            <td class="text-center"><?php echo $row['waktu_keluar'] ? date('H:i', strtotime($row['waktu_keluar'])) : '<span class="text-muted">-</span>'; ?></td>
+                            <td class="text-center">
+                                <?php if($row['status'] == 'Selesai'): ?>
+                                    <span class="badge bg-success px-2 py-1">Selesai</span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning text-dark px-2 py-1">Parkir</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-end fw-bold">
+                                <?php echo $row['total_bayar'] > 0 ? $rp($row['total_bayar']) : '-'; ?>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" 
+                                        class="btn btn-outline-danger btn-sm py-0 px-2"
+                                        onclick="konfirmasiHapus(<?php echo (int)$row['id_parkir']; ?>, '<?php echo htmlspecialchars($row['nomor_plat']); ?>', '<?php echo $tgl; ?>')"
+                                        title="Hapus">
+                                    <i class="fa-solid fa-trash-can small"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                    <?php if($jml_total > 0): ?>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" class="text-end">TOTAL PENDAPATAN :</td>
+                            <!-- Hijau Total Pendapatan Footer Senada -->
+                            <td class="text-end text-green-fresh fs-6"><?php echo $rp($total_pendapatan); ?></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                    <?php endif; ?>
+                </table>
+            </div>
         </div>
-
-    </div>
-
-    <div class="mt-5 py-3 text-center text-muted small border-top">
-        Sistem Parkir &copy; <?php echo date('Y'); ?>
-    </div>
+    </main>
 
     <script>
     function konfirmasiHapus(id, plat, tanggal) {
         Swal.fire({
-            title: 'Hapus Data Parkir?',
+            title: 'Hapus data parkir?',
             html: 'Data kendaraan plat <strong>' + plat + '</strong> akan dihapus permanen.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Hapus',
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = 'index.php?page=hapus&id=' + id + '&from=laporan&tanggal=' + tanggal;
+                window.location.href = 'index.php?page=hapus&id=' + id + '&from=laporan&tanggal=' + encodeURIComponent(tanggal);
             }
         });
     }
     </script>
-
 </body>
 </html>
