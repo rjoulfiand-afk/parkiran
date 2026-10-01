@@ -10,7 +10,6 @@ class AuthController {
     }
 
     public function login() {
-        // Kalau sudah login, langsung ke dashboard
         if (isset($_SESSION['id_admin'])) {
             header("Location: index.php?page=dashboard");
             exit;

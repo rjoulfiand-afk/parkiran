@@ -54,7 +54,6 @@ class ParkirController {
                 $_POST['waktu_keluar'],
                 $_POST['total_bayar']
             );
-            // Kirim bayar ke URL untuk ditampilkan di pop-up (sesuai soal)
             header("Location: index.php?page=parkir_keluar&pesan=sukses_keluar&bayar=" . (int)$_POST['total_bayar']);
             exit;
         }
@@ -104,7 +103,6 @@ class ParkirController {
         echo '</head><body>';
 
         echo '<table>';
-        // Atur lebar kolom paten di Excel (Anti #######)
         echo '<colgroup>';
         echo '<col width="50">';
         echo '<col width="130">';

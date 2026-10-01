@@ -15,7 +15,6 @@ if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
 
     <div class="container">
 
-        <!-- Alert login sukses -->
         <?php if(isset($_GET['pesan']) && $_GET['pesan']=='welcome'): ?>
         <script>
             Swal.fire({
@@ -29,7 +28,6 @@ if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
         </script>
         <?php endif; ?>
 
-        <!-- Alert hapus sukses dari dashboard -->
         <?php if(isset($_GET['pesan']) && $_GET['pesan']=='hapus_sukses'): ?>
         <script>
             Swal.fire({

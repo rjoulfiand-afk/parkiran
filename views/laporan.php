@@ -170,7 +170,6 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
         <?php endif; ?>
 
         <div class="box-panel mb-4 shadow-sm">
-            <!-- Toolbar Filter & Tombol Ekspor -->
             <div class="toolbar-container">
                 <form action="index.php" method="GET" class="filter-group m-0">
                     <input type="hidden" name="page" value="laporan">
@@ -191,11 +190,10 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                 </div>
             </div>
 
-            <!-- 4 Kotak Ringkasan Angka -->
             <div class="summary-grid">
                 <div class="summary-item">
                     <div class="label">Total Pendapatan</div>
-                    <!-- Hijau lebih hidup & segar -->
+            
                     <div class="val text-green-fresh"><?php echo $rp($total_pendapatan); ?></div>
                 </div>
                 <div class="summary-item">
@@ -213,7 +211,6 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                 </div>
             </div>
 
-            <!-- Tabel Data Laporan -->
             <div class="table-responsive">
                 <table class="table-laporan">
                     <thead>
@@ -270,7 +267,7 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                     <tfoot>
                         <tr>
                             <td colspan="6" class="text-end">TOTAL PENDAPATAN :</td>
-                            <!-- Hijau Total Pendapatan Footer Senada -->
+                            
                             <td class="text-end text-green-fresh fs-6"><?php echo $rp($total_pendapatan); ?></td>
                             <td></td>
                         </tr>
