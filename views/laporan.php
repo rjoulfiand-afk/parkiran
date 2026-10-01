@@ -157,18 +157,6 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
             <div class="text-muted small">Periode: <strong><?php echo tgl_indo($tanggal); ?></strong></div>
         </div>
 
-        <?php if(isset($_GET['pesan']) && $_GET['pesan']=='hapus_sukses'): ?>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Data Dihapus',
-                text: 'Data parkir telah berhasil dihapus dari sistem.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        </script>
-        <?php endif; ?>
-
         <div class="box-panel mb-4 shadow-sm">
             <div class="toolbar-container">
                 <form action="index.php" method="GET" class="filter-group m-0">
@@ -202,7 +190,6 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                 </div>
                 <div class="summary-item">
                     <div class="label">Sudah Selesai</div>
-                    <!-- Hitam Solid -->
                     <div class="val text-dark"><?php echo $jml_selesai; ?> <small class="fs-6 fw-normal text-muted">Unit</small></div>
                 </div>
                 <div class="summary-item">
@@ -216,19 +203,18 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                     <thead>
                         <tr>
                             <th class="text-center" style="width: 5%;">No</th>
-                            <th style="width: 18%;">No. Plat</th>
+                            <th style="width: 20%;">No. Plat</th>
                             <th style="width: 15%;">Jenis</th>
-                            <th class="text-center" style="width: 14%;">Waktu Masuk</th>
-                            <th class="text-center" style="width: 14%;">Waktu Keluar</th>
-                            <th class="text-center" style="width: 12%;">Status</th>
-                            <th class="text-end" style="width: 14%;">Total Bayar</th>
-                            <th class="text-center" style="width: 8%;">Aksi</th>
+                            <th class="text-center" style="width: 15%;">Waktu Masuk</th>
+                            <th class="text-center" style="width: 15%;">Waktu Keluar</th>
+                            <th class="text-center" style="width: 13%;">Status</th>
+                            <th class="text-end" style="width: 17%;">Total Bayar</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if($jml_total == 0): ?>
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 Tidak ada data transaksi parkir pada tanggal ini.
                             </td>
                         </tr>
@@ -236,7 +222,6 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                         <?php foreach($baris as $i => $row): ?>
                         <tr>
                             <td class="text-center text-muted"><?php echo $i + 1; ?></td>
-                            <!-- Plat Nomor Hitam Solid -->
                             <td class="fw-bold text-dark"><?php echo htmlspecialchars($row['nomor_plat']); ?></td>
                             <td><?php echo htmlspecialchars($row['jenis_kendaraan']); ?></td>
                             <td class="text-center"><?php echo date('H:i', strtotime($row['waktu_masuk'])); ?></td>
@@ -251,14 +236,6 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                             <td class="text-end fw-bold">
                                 <?php echo $row['total_bayar'] > 0 ? $rp($row['total_bayar']) : '-'; ?>
                             </td>
-                            <td class="text-center">
-                                <button type="button" 
-                                        class="btn btn-outline-danger btn-sm py-0 px-2"
-                                        onclick="konfirmasiHapus(<?php echo (int)$row['id_parkir']; ?>, '<?php echo htmlspecialchars($row['nomor_plat']); ?>', '<?php echo $tgl; ?>')"
-                                        title="Hapus">
-                                    <i class="fa-solid fa-trash-can small"></i>
-                                </button>
-                            </td>
                         </tr>
                         <?php endforeach; ?>
                         <?php endif; ?>
@@ -267,9 +244,7 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
                     <tfoot>
                         <tr>
                             <td colspan="6" class="text-end">TOTAL PENDAPATAN :</td>
-                            
                             <td class="text-end text-green-fresh fs-6"><?php echo $rp($total_pendapatan); ?></td>
-                            <td></td>
                         </tr>
                     </tfoot>
                     <?php endif; ?>
@@ -277,24 +252,5 @@ $rp  = function($n) { return 'Rp '.number_format($n, 0, ',', '.'); };
             </div>
         </div>
     </main>
-
-    <script>
-    function konfirmasiHapus(id, plat, tanggal) {
-        Swal.fire({
-            title: 'Hapus data parkir?',
-            html: 'Data kendaraan plat <strong>' + plat + '</strong> akan dihapus permanen.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = 'index.php?page=hapus&id=' + id + '&from=laporan&tanggal=' + encodeURIComponent(tanggal);
-            }
-        });
-    }
-    </script>
 </body>
 </html>

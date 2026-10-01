@@ -28,18 +28,6 @@ if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
         </script>
         <?php endif; ?>
 
-        <?php if(isset($_GET['pesan']) && $_GET['pesan']=='hapus_sukses'): ?>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Data Dihapus',
-                text: 'Data parkir berhasil dihapus.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        </script>
-        <?php endif; ?>
-
         <!-- Kartu Statistik -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
@@ -120,16 +108,11 @@ if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($row['waktu_masuk'])); ?></td>
-                                <td class="d-flex justify-content-center gap-2">
+                                <td>
                                     <a href="index.php?page=parkir_keluar&cari_plat=<?php echo urlencode($row['nomor_plat']); ?>"
                                        class="btn btn-sm btn-outline-danger fw-semibold">
                                         <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Keluarkan
                                     </a>
-                                    <button
-                                        onclick="konfirmasiHapusDashboard(<?php echo $row['id_parkir']; ?>, '<?php echo htmlspecialchars($row['nomor_plat']); ?>')"
-                                        class="btn btn-sm btn-outline-secondary fw-semibold">
-                                        <i class="fa fa-trash me-1"></i> Hapus
-                                    </button>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -149,25 +132,6 @@ if(!isset($_SESSION['id_admin'])) { header("Location: index.php"); exit; }
     <div class="mt-5 py-3 text-center text-muted small border-top">
         Sistem Parkir &copy; <?php echo date('Y'); ?>
     </div>
-
-    <script>
-    function konfirmasiHapusDashboard(id, plat) {
-        Swal.fire({
-            title: 'Hapus Data?',
-            html: 'Plat <strong>' + plat + '</strong> akan dihapus permanen.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = 'index.php?page=hapus&id=' + id + '&from=dashboard';
-            }
-        });
-    }
-    </script>
 
 </body>
 </html>
